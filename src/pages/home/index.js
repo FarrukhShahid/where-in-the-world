@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { TextField, Card, CardContent, Typography, MenuItem, Select, Paper, InputAdornment, CircularProgress, Alert, Button } from '@mui/material';
+import { TextField, MenuItem, Select, Paper, InputAdornment, Button } from '@mui/material';
 import { SearchRounded } from '@mui/icons-material';
 import { getCountriesList } from '../../services/data';
 import { MODEL_DATA } from '../../utils/functions';
 import { ApiVersionContext } from '../../api-version-context';
+import { AlertX, CardX, UxSpace } from '../../components';
 
 function Home() {
     const { apiVersion } = useContext(ApiVersionContext);
@@ -90,28 +90,31 @@ function Home() {
                 </Paper>
             </div>
             <div className={`mt-4`}>
-                {error &&
-                    <Alert severity='error' action={<Button onClick={() => setRefreshContent(!refreshContent)}>Try Again</Button>}>Error fetching data</Alert>
+                {error && <AlertX 
+                    type="error"
+                    message="Error fetching data"
+                    action={<Button onClick={() => setRefreshContent(!refreshContent)}>Try Again</Button>}/>
                 }
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {loading ? <CircularProgress /> :
+                    {loading ? [...Array(10).keys()].map((_, i) => <CardX key={i} loading={true} />) :
                         // <VirtualizedList data={filteredCountries}/>
                         filteredCountries.map(country => (
-                            <Link to={`/country/${country.name}`} key={country.name}>
-                                <Card>
-                                    <img src={country.flag} alt={country.name} className="w-full h-32 object-cover mb-4" />
-                                    <CardContent>
-                                        <Typography variant="h6" component="div">{country.name}</Typography>
-                                        <Typography variant="body2" color="textSecondary"><strong>Population:</strong> {country.population.toLocaleString()}</Typography>
-                                        <Typography variant="body2" color="textSecondary"><strong>Region:</strong> {country.region}</Typography>
-                                        <Typography variant="body2" color="textSecondary"><strong>Capital:</strong> {country.capital}</Typography>
-                                    </CardContent>
-                                </Card>
-                            </Link>
+                            <CardX
+                                key={country.name}
+                                title={country.name}
+                                src={country.flag}
+                                to={`/country/${country.name}`}
+                                alt={country.name}
+                                content={[
+                                    { key: "Population", value: country.population.toLocaleString() },
+                                    { key: "Region", value: country.region },
+                                    { key: "Capital", value: country.capital }
+                                ]}
+                            />
                         ))
                     }
                 </div>
-
+                <UxSpace />
             </div>
         </div>
     );
