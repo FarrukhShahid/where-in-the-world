@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import * as Pages from './pages';
 import { ContainerX } from './components';
 import { ThemeProviderX } from './theme-context';
@@ -30,6 +30,7 @@ function App() {
               <Route path="/" element={<Pages.Home />} />
                {/* Details page to show the details of a particular country  */}
               <Route path="/country/:name" element={<Pages.CountryDetail />} />
+              <Route path='*' element={<Navigate to={"/"}/>}/>
             </Routes>
           </ContainerX>
         </Router>
