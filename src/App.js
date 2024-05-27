@@ -20,7 +20,7 @@ function App() {
         {/**
          * React Router
          */}
-        <Router>
+        <Router basename={process.env.NODE_ENV === "development" ? "" : "/where-in-the-world"}>
           {/**
            * A container to wrap the application, it provides the header and body to render pages
            */}
