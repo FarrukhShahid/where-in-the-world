@@ -1,3 +1,9 @@
+
+/**
+ * Validates and parse an array
+ * @param {Any} elem 
+ * @returns If its array it will return as it is, if object, then its values, else a string
+ */
 export const makeItReadable = (elem) => {
     try {
         return Array.isArray(elem) ? elem : typeof elem === "object" ? Object.values(elem): elem.toString()
@@ -7,8 +13,13 @@ export const makeItReadable = (elem) => {
     }
 }
 
+/**
+ * Model the api data of multiple versions to make it simple
+ * @param {Object} data Array or object to model as a schema
+ * @param {Double} version api version defaulting to 2
+ * @returns returns Array or an object depending on the input
+ */
 export const MODEL_DATA = (data, version) => {
-    console.log('data', data, version);
     const parsedVersion = parseFloat(version);
     if (parsedVersion === 2) {
         return Array.isArray(data) ? data.map(item => ({
@@ -18,7 +29,9 @@ export const MODEL_DATA = (data, version) => {
         )
         ) : {
             ...data,
-            flag: data.flags.png
+            flag: data.flags.png,
+            languages: makeItReadable(data.languages),
+            currencies: makeItReadable(data.currencies),
         }
     }
     else if (parsedVersion === 3.1) {

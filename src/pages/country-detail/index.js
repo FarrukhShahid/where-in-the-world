@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '@mui/material';
 import { getCountryByCode, getCountryByName } from '../../services/data';
 import { ArrowBack } from '@mui/icons-material';
 import { ApiVersionContext } from '../../api-version-context';
 import { MODEL_DATA } from '../../utils/functions';
+import { AlertX, DetailCard, ProgressX } from '../../components';
 
 function CountryDetail() {
-    const { name } = useParams();
-    const { apiVersion } = useContext(ApiVersionContext);
-    const [country, setCountry] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [borderCountries, setBorderCountries] = useState([]);
+    const { name } = useParams(); // Getting the country name in params
+    const { apiVersion } = useContext(ApiVersionContext); // getting the api version from context api
+    const navigate = useNavigate(); // to navigate
+    const location = useLocation(); // to use the current location
+    const [country, setCountry] = useState(null); // current country data
+    const [loading, setLoading] = useState(false); 
+    const [borderCountries, setBorderCountries] = useState([]); // border countries list of the current country
     const [laodingBorderCountries, setLaodingBorderCountries] = useState(false);
-    
-    
+    const [refreshContent, setRefreshContent] = useState(false);
+
 
     useEffect(() => {
         if (name) {
@@ -22,28 +25,35 @@ function CountryDetail() {
                 try {
                     setCountry(null);
                     setLoading(true);
+                    /**
+                     * Fetching the specified country complete data using the Name of the country
+                     */
                     const response = await getCountryByName(name, apiVersion);
-                    console.log('response', response);
-                    const parsedData = MODEL_DATA(response.data[0], parseFloat(apiVersion))
-                    setCountry(parsedData);
+                    // console.log('response', response);
+                    // saving the results after modeling them
+                    setCountry(MODEL_DATA(response.data[0], parseFloat(apiVersion)));
                 } catch (error) {
-                    console.log('Error fetching country details:', error);
+                    console.error('Error fetching country details:', error);
                 } finally {
                     setLoading(false);
                 }
             };
             fetchCountryDetails();
         }
-    }, [name, apiVersion]);
+    }, [name, apiVersion, refreshContent]); // Listining to name, api version and forced refreshContent changes
 
     useEffect(() => {
         if (country) {
             const fetchBorderCountries = async () => {
                 try {
+                    setBorderCountries([])
                     setLaodingBorderCountries(true);
+                    /**
+                     * Getting the border countries list using the codes fetched in the country data from the other API
+                     */
                     const responseBorderCoutnries = await getCountryByCode(country.borders, apiVersion)
-                    console.log('responseBorderCoutnries', responseBorderCoutnries)
-                    setBorderCountries(responseBorderCoutnries.data);
+                    // saving the results after modeling them
+                    setBorderCountries(MODEL_DATA(responseBorderCoutnries.data, apiVersion));
                 } catch (error) {
                     console.log('error', error);
                 }
@@ -53,35 +63,50 @@ function CountryDetail() {
             }
             fetchBorderCountries();
         }
-    }, [country, apiVersion])
+    }, [country, apiVersion]) // Listining to country, api version
 
-    if (loading) return <CircularProgress />;
+    const handleNavigation = () => {
+        // If the details page is hit directly using the url, the key will be default so we will redirect back to home page
+        if (location.key !== 'default') {
+            navigate(-1);
+          } else {
+            navigate('/');
+          }
+      };
 
     return (
         <div className="container mx-auto p-4">
-            <Button LinkComponent={Link} to="/" variant="contained"  className='shadow-dm' startIcon={<ArrowBack />}>Back</Button>
+            <Button onClick={handleNavigation} variant="contained" color='primary' className='shadow-dm' startIcon={<ArrowBack />}>Back</Button>
             {
-                country ?
-                    <Card className="flex flex-col lg:flex-row items-start mt-4">
-                        <img src={country.flag} alt={country.name} className="w-full lg:w-1/2 h-auto object-fit mb-4 lg:mb-0" />
-                        <CardContent className="lg:ml-8">
-                            <Typography variant="h4" component="div" className="mb-4">{country.name}</Typography>
-                            <Typography variant="body1"><strong>Native Name:</strong> {country.nativeName}</Typography>
-                            <Typography variant="body1"><strong>Population:</strong> {country.population.toLocaleString()}</Typography>
-                            <Typography variant="body1"><strong>Region:</strong> {country.region}</Typography>
-                            <Typography variant="body1"><strong>Sub Region:</strong> {country.subregion}</Typography>
-                            <Typography variant="body1"><strong>Capital:</strong> {country.capital}</Typography>
-                            <Typography variant="body1"><strong>Top Level Domain:</strong> {country.topLevelDomain.join(', ')}</Typography>
-                            <Typography variant="body1"><strong>Currencies:</strong> {country.currencies.map(c => c.name).join(', ')}</Typography>
-                            <Typography variant="body1"><strong>Languages:</strong> {country.languages.toString()}</Typography>
-                            <div className={`mt-5`}>
-                                <Typography variant="body1"><strong>Border Countries:</strong> { laodingBorderCountries? <CircularProgress />:
-                                    country.borders ? country.borders.join(', ') : 'None'}</Typography>
+                loading ? <DetailCard loading={true} /> :
 
-                            </div>
-                        </CardContent>
-                    </Card> :
-                    <div>No Data Found</div>
+                    country ? <DetailCard
+                        title={country.name}
+                        src={country.flag}
+                        content={[
+                            { key: "Native Name", value: country.nativeName },
+                            { key: "Population", value: country.population.toLocaleString() },
+                            { key: "Region", value: country.region },
+                            { key: "Sub Region", value: country.subregion },
+                            { key: "Capital", value: country.capital },
+                            { key: "Top Level Domain", value: country.topLevelDomain.join(', ') },
+                            { key: "Currencies", value: country.currencies.map(c => c.name).join(', ') },
+                            { key: "Languages", value: country.languages.map(c => c.name || c).join(', ') },
+                        ]}
+                        actiontitle={"Border Countries"}
+                        actions={
+                            laodingBorderCountries ? [<ProgressX skeleton={true} block={true} width={100} height={30} />, <ProgressX skeleton={true} block={true} width={100} height={30} />, <ProgressX skeleton={true} block={true} width={100} height={30} />] :
+                                (borderCountries.length > 0 ? borderCountries.map(ncountry =>
+                                    <Button LinkComponent={Link} size='small' variant='outlined' color="secondary" to={`/country/${ncountry.name}`}>{ncountry.name}</Button>
+                                ) : [])
+                        }
+                    /> : <div className={`p-4`}>
+                        <AlertX
+                            type={"error"}
+                            message={"Somthing went wrong, Please try again."}
+                            action={<Button color='secondary' onClick={() => setRefreshContent(!refreshContent)}>Try Again</Button>}
+                        />
+                    </div>
             }
         </div>
     );

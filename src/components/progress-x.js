@@ -8,16 +8,16 @@ function ProgressX({
     width,
     centered,
     block,
-
+    ...rest
 }) {
     if (skeleton) {
         if (block) {
-            return <Skeleton variant='rectangular' width={width} height={height} />
+            return <Skeleton variant='rectangular' width={width} height={height} {...rest}/>
         }
         return (
             rows && [...Array(parseInt(rows) || 8).keys()].map((_, i) => (
                 <div key={i} className={``}>
-                    <Skeleton width={width} height={height} />
+                    <Skeleton width={width} height={height} className={`mt-2`} />
                 </div>
             ))
         )
@@ -25,12 +25,12 @@ function ProgressX({
     if (centered) {
         return (
             <div className={`flex justify-center`}>
-                <CircularProgress />
+                <CircularProgress color='secondary' />
             </div>
         )
     }
     return (
-        <CircularProgress />
+        <CircularProgress color='secondary' {...rest}/>
     )
 }
 export default ProgressX

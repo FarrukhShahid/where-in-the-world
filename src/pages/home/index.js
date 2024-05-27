@@ -7,30 +7,35 @@ import { ApiVersionContext } from '../../api-version-context';
 import { AlertX, CardX, UxSpace } from '../../components';
 
 function Home() {
-    const { apiVersion } = useContext(ApiVersionContext);
-    const [countries, setCountries] = useState([]);
-    const [search, setSearch] = useState('');
-    const [regions, setRegions] = useState([]);
-    const [selectedRegion, setSelectedRegion] = useState('');
-    const [loading, setLoading] = useState(false);
+    const { apiVersion } = useContext(ApiVersionContext); // getting the api version from context api
+    const [countries, setCountries] = useState([]); // countries list
+    const [search, setSearch] = useState(''); // search text field value
+    const [regions, setRegions] = useState([]); // available regions in the countiries
+    const [selectedRegion, setSelectedRegion] = useState(''); // selected region if any else all
+    const [loading, setLoading] = useState(false); 
     const [error, setError] = useState(null);
     const [refreshContent, setRefreshContent] = useState(false);
 
     useEffect(() => {
         const fetchCountries = async () => {
             try {
+                // Resetting the states
                 setError(null);
                 setLoading(true);
-                const response = await getCountriesList("", apiVersion);
-                console.log('response', response);
-                setCountries(MODEL_DATA(response.data, apiVersion)); // saving the original results
+                /**
+                 * Fetching the countries using fields name, capital, population, region and flags only. 
+                 * We dont need rest of the data on home screen
+                 * */ 
+                const response = await getCountriesList("name,capital,population,region,flags", apiVersion);
+                // console.log('response', response);
+                setCountries(MODEL_DATA(response.data, apiVersion)); // saving the results after modeling them
                 // Extract unique regions
                 const uniqueRegions = [...new Set(response.data.map(country => country.region))];
                 setRegions(uniqueRegions);
             } catch (error) {
                 // TODO: Add the notify package here
                 setError(error);
-                console.log('error', error);
+                console.error('error', error);
             } finally {
                 setLoading(false);
             }
@@ -38,6 +43,12 @@ function Home() {
         fetchCountries();
     }, [apiVersion, refreshContent]);
 
+    /**
+     * Filtering the countries based on the search text-field text. 
+     * This is done on the client side rather calling the API for searching. and this is becasuse of two reasons
+     * 1. The API fails alot
+     * 2. There are not a lot of records to search via api
+     */
     const filteredCountries = countries.filter(country =>
         country.name.toLowerCase().includes(search.toLowerCase()) &&
         (selectedRegion === '' || country.region === selectedRegion)
@@ -46,6 +57,7 @@ function Home() {
     return (
         <div className="container mx-auto p-4">
             <div className={`flex flex-wrap justify-between`}>
+                {/* Search text field */}
                 <TextField
                     placeholder="Search"
                     component={Paper}
@@ -60,7 +72,7 @@ function Home() {
                         </InputAdornment>,
                     }}
                 />
-                
+                {/* Regions filter */}
                 <Paper className='shadow-md'>
                     <Select
                         // placeholder='Filter by Region'
@@ -93,13 +105,13 @@ function Home() {
                 {error && <AlertX 
                     type="error"
                     message="Error fetching data"
-                    action={<Button onClick={() => setRefreshContent(!refreshContent)}>Try Again</Button>}/>
+                    action={<Button color='secondary' onClick={() => setRefreshContent(!refreshContent)}>Try Again</Button>}/>
                 }
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {loading ? [...Array(10).keys()].map((_, i) => <CardX key={i} loading={true} />) :
                         // <VirtualizedList data={filteredCountries}/>
                         filteredCountries.map(country => (
-                            <CardX
+                            <CardX // Card component to show view the country
                                 key={country.name}
                                 title={country.name}
                                 src={country.flag}
