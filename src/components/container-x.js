@@ -8,7 +8,7 @@ function ContainerX({ children }) {
   const { mode, toggleDarkMode } = useContext(ThemeContext);
   const { apiVersion, changeApiVersion } = useContext(ApiVersionContext);
   return (
-    <div className={`min-h-screen overflow-hidden bg-gray-50 ${mode} dark:bg-gray-800  text-black`}>
+    <Paper className={`min-h-screen overflow-hidden `}>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar color='inherit' position="static">
           <Toolbar>
@@ -45,7 +45,7 @@ function ContainerX({ children }) {
       <div className="px-6 pt-10 pb-8 sm:px-10">
         {children}
       </div>
-    </div>
+    </Paper>
   )
 }
 export default ContainerX
