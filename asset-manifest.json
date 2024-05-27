@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/where-in-the-world/static/css/main.f1c40ec4.css",
+    "main.js": "/where-in-the-world/static/js/main.db03f1fa.js",
+    "static/js/453.85879c39.chunk.js": "/where-in-the-world/static/js/453.85879c39.chunk.js",
+    "index.html": "/where-in-the-world/index.html",
+    "main.f1c40ec4.css.map": "/where-in-the-world/static/css/main.f1c40ec4.css.map",
+    "main.db03f1fa.js.map": "/where-in-the-world/static/js/main.db03f1fa.js.map",
+    "453.85879c39.chunk.js.map": "/where-in-the-world/static/js/453.85879c39.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f1c40ec4.css",
+    "static/js/main.db03f1fa.js"
+  ]
+}
