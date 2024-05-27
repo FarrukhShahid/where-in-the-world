@@ -73,11 +73,11 @@ function Home() {
                     }}
                 />
                 {/* Regions filter */}
-                <Paper className='shadow-md'>
                     <Select
                         // placeholder='Filter by Region'
+                        className='shadow-md' 
                         fullWidth
-                        sx={{ maxWidth: '30ch' }}
+                        sx={{ maxWidth: { lg: '30ch', xs: '50ch'} }}
                         displayEmpty
                         value={selectedRegion}
                         onChange={e => setSelectedRegion(e.target.value)}
@@ -99,7 +99,6 @@ function Home() {
                         }
                     </Select>
 
-                </Paper>
             </div>
             <div className={`mt-4`}>
                 {error && <AlertX 
